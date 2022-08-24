@@ -175,6 +175,7 @@ func declare_dead_animal{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range
     token_id : Uint256
 ):
     ERC721Enumerable._burn(token_id)
+    animal_by_token_id.write(token_id, Animal(sex=0, legs=0, wings=0))
     return ()
 end
 
