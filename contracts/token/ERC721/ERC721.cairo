@@ -1,7 +1,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_contract_address, get_caller_address
 from starkware.cairo.common.uint256 import (
     Uint256,
     uint256_add,
@@ -10,6 +10,7 @@ from starkware.cairo.common.uint256 import (
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.token.erc721.library import ERC721
 from starkware.cairo.common.math import split_felt
+from contracts.token.ERC20.IERC20 import IERC20
 
 #
 # Constructor
@@ -17,16 +18,25 @@ from starkware.cairo.common.math import split_felt
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    name : felt, symbol : felt
+    name : felt, symbol : felt, _dummy_token_address : felt,
 ):
     ERC721.initializer(name, symbol)
     ERC721Enumerable.initializer()
     last_token_id.write(Uint256(0, 0))
+    dummy_token_address_storage.write(_dummy_token_address)
     return ()
 end
 
 @storage_var
 func last_token_id() -> (token_id : Uint256):
+end
+
+@storage_var
+func breeder_accounts(account : felt) -> (exists : felt):
+end
+
+@storage_var
+func dummy_token_address_storage() -> (dummy_token_address_storage : felt):
 end
 
 struct Animal:
@@ -125,14 +135,32 @@ end
 
 # implementing interface IExerciseSolution
 
-# func is_breeder(account : felt) -> (is_approved : felt):
-# end
+@view
+func is_breeder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(account : felt) -> (is_approved : felt):
+    # todo check if need to verify key exists
+    let (exists) = breeder_accounts.read(account)
+    return (exists)
+end
 
-# func registration_price() -> (price : Uint256):
-# end
+@view
+func registration_price{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (price : Uint256):
+    return (Uint256(1, 0))
+end
 
-# func register_me_as_breeder() -> (is_added : felt):
-# end
+@external
+func register_me_as_breeder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (is_added : felt):
+    alloc_locals
+
+    let (sender_address) = get_caller_address()
+    let (my_address) = get_contract_address()
+    let (dummy_token_address) = dummy_token_address_storage.read()
+
+    with_attr error_message("Can't charge registration fee"):
+        IERC20.transferFrom(contract_address=dummy_token_address, sender=sender_address, recipient=my_address, amount=Uint256(1, 0))
+    end
+    breeder_accounts.write(sender_address, 1)
+    return (1)
+end
 
 @external
 func declare_animal{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
