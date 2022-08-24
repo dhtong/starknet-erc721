@@ -269,4 +269,15 @@ You sent a transaction, and it is shown as "undetected" in voyager? This can mea
 You can (and should) check the status of your transaction with the following URL  [https://alpha4.starknet.io/feeder_gateway/get_transaction_receipt?transactionHash=](https://alpha4.starknet.io/feeder_gateway/get_transaction_receipt?transactionHash=)  , where you can append your transaction hash.
 ​
 
-​
+
+### Common libraries
+
+OpenZeppelin has implementations for some commonly used ERC721 patterns, eg enumerable [here](https://github.com/OpenZeppelin/cairo-contracts/tree/main/src/openzeppelin/token/erc721/enumerable)
+
+Starkware also has some useful utils, like basic math operations. They can be found [here](https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo)
+
+
+### Communities
+
+some starknet communities for questions:
+- https://community.starknet.io/c/starknet-development/6
